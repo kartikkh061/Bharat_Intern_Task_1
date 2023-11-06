@@ -1,0 +1,106 @@
+# Importing Various Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+import sklearn
+from sklearn import linear_model
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+# Loading the Data
+df=pd.read_csv("C:/Users/ishaan khurana/Downloads/titanic.csv")
+df
+
+# Understanding the Data
+df.info()
+df.head()
+df.tail()
+df.shape
+
+# Data Preprocessing
+df.isnull().sum()
+plt.figure(figsize=(7,4))
+sns.heatmap(df.isnull())
+df.columns.values
+df.isnull()
+df.drop(columns=['Cabin'], inplace = True)
+df['Age'].fillna(df['Age'].mean(), inplace = True)
+df['Embarked'].value_counts()
+df['Embarked'].fillna('S', inplace = True)
+df
+df['Parch'].value_counts()
+df['SibSp'].value_counts()
+df['Survived'] = df['Survived'].astype('category')
+df['Pclass'] = df['Pclass'].astype('category')
+df['Sex'] = df['Sex'].astype('category')
+df['Age'] = df['Age'].astype('category')
+df['Embarked'] = df['Embarked'].astype('category')
+df.info()
+df.isnull().sum()
+df.describe()
+death_percent=round((df['Survived'].value_counts().values[0]/891)*100)
+print((df['Pclass'].value_counts()/891)*100)
+
+# Data Visualization
+sns.set_style('whitegrid')
+sns.countplot(x='Survived', hue = 'Pclass', data = df)
+print((df['Parch'].value_counts()/891)*100)
+sns.set_style('whitegrid')
+sns.countplot(x = 'Survived', hue = 'Parch',data = df)
+print((df['Age'].value_counts()/891)*100)
+df['Age'].hist(bins=30,color='darkblue',alpha=0.3)
+sns.set_style('whitegrid')
+sns.countplot(x='Survived', data = df)
+sns.set_style('whitegrid')
+sns.countplot(x='Survived', hue = 'Sex', data = df)
+sns.countplot(x='SibSp', data = df)
+df['Age'] = pd.to_numeric(df['Age'])
+plt.figure(figsize=(12,7))
+sns.boxplot(x='Pclass', y = 'Age' , data=df)
+plt.show()
+def imput_age(cols):
+    Age = cols[0]
+    Pclass = cols[1]
+    if pd.isnull(Age):
+      if Pclass ==1:
+        return 37
+
+      elif Pclass ==2:
+        return 29
+
+      else:
+        return 24
+    else:
+      return Age
+df['Age'] = df[['Age', 'Pclass']].apply(imput_age,axis=1)
+plt.figure(figsize=(7,4))
+sns.heatmap(df.isnull())
+df.head()
+df.info()
+pd.get_dummies(df['Embarked'],drop_first = True).head()
+sex = pd.get_dummies(df['Sex'],drop_first = True)
+embark = pd.get_dummies(df['Embarked'],drop_first = True)
+df.drop(['Sex','Embarked','Name','Ticket'],axis=1,inplace = True)
+df.head()
+df = pd.concat([df,sex,embark],axis =1)
+df.head()
+df.drop('Survived',axis=1).head()
+df['Survived'].head()
+
+# Splitting the Data
+x_train, x_test , y_train , y_test = train_test_split(df.drop('Survived',axis=1),df['Survived'],test_size=0.30, random_state=42)
+
+# Applying the Logistic Regression
+lr = LogisticRegression()
+lr.fit(x_train,y_train)
+predict= lr.predict(x_test)
+from sklearn.metrics import confusion_matrix
+accuracy = confusion_matrix(y_test,predict)
+accuracy
+
+# Checking the Accuracy
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(y_test,predict)
+accuracy
